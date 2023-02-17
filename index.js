@@ -1,16 +1,14 @@
-
-/* Noooooooode.js */
-// npm init => package.json
-// npm install Moduel => package-lock.json , node_modules
-
+/* Noooooooode.js
+npm init => packagejson
+npm install Moduel => package-lock.json , node_modules
+ */
 
 // window in js == global in node.js
 // node is using file global and every file is a module
 //console.log(global)
 
 
-const { sayHello, named } = require('./fun') // import from other file
-
+//const { sayHello, named } = require('./fun') // import from other file
 
 /*  File Systems Module */
 const fs = require('fs');
@@ -50,25 +48,26 @@ const http = require('http');
 /* Expreeeeeeees.js & nodeeeeeeee.js */
 // Express is a framework for Node.js
 const express = require('express')
-const app = express()
-// Morgane is a middleware used to know data from req was send
 const morgan = require('morgan')
-app.use(morgan()) // used before requestes
+
+const app = express()
 
 
-/* Router intialize */
-app.use(express.json()) // to under stand data was send as a json & it's a middleware
-// custome middleware
+// MiddleWares
 // to use middleware => we use app.use(middleware)
-app.use((req, res, next) => {
+app.use(morgan("dev")) // used to know data from req was send & used before requestes
+app.use(express.json()) // to under stand data was send as a json & it's a middleware
+app.use(express.static(`${__dirname}/public`)) // to access on html files
+
+app.use((req, res, next) => { // custome middleware
   console.log("this is a middleware")
   next() // to run next code and not stop runing her
 })
-// use Router
+
+
+/* Router intialize */
 const pagesRouter = require('./router/pages')
 app.use('/test', pagesRouter) // will add any rout after '/test'
-
-
 
 
 
@@ -79,14 +78,11 @@ dataBaseConnect()
 
 
 
+module.exports = app
 
 
 
 
 
 
-//create a server with express
-const port = process.env.PORT || 3000
-app.listen(port, () => {
-  console.log("Start Server")
-})
+
