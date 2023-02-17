@@ -1,2 +1,2 @@
-# Stady_node
+# Study_node
 about nodejs , express and mongoldb.
