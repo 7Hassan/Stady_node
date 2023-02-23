@@ -1,7 +1,8 @@
-/* Noooooooode.js
-npm init => packagejson
-npm install Moduel => package-lock.json , node_modules
- */
+
+/* Node.js */
+// npm init => package.json
+// npm install Module => package-lock.json , node_modules
+
 
 // window in js == global in node.js
 // node is using file global and every file is a module
@@ -19,7 +20,7 @@ fs.readFile('./index.js', 'utf-8', (err, data) => { //good
 //fs.writeFileSync('./run', text); //create a file
 
 
-/* Opertaing System Module */
+/* Operating System Module */
 const os = require('os');
 //console.log(os.userInfo()) information about system
 //console.log(os.arch())
@@ -37,7 +38,7 @@ const path = require('path')
 /* Http Module */
 const http = require('http');
 // const server = http.createServer((req, res) => {
-//   res.end('messege from server');
+//   res.end('messene from server');
 // })
 // create a server with node.js
 // server.listen(8000, () => {
@@ -45,7 +46,7 @@ const http = require('http');
 // })
 
 
-/* Expreeeeeeees.js & nodeeeeeeee.js */
+/* Express.js & node.js */
 // Express is a framework for Node.js
 const express = require('express')
 const morgan = require('morgan')
@@ -55,17 +56,17 @@ const app = express()
 
 // MiddleWares
 // to use middleware => we use app.use(middleware)
-app.use(morgan("dev")) // used to know data from req was send & used before requestes
+app.use(morgan("dev")) // used to know data from req was send & used before requested
 app.use(express.json()) // to under stand data was send as a json & it's a middleware
 app.use(express.static(`${__dirname}/public`)) // to access on html files
 
-app.use((req, res, next) => { // custome middleware
+app.use((req, res, next) => { // customer middleware
   console.log("this is a middleware")
-  next() // to run next code and not stop runing her
+  next() // to run next code and not stop running her
 })
 
 
-/* Router intialize */
+/* Router initialize */
 const pagesRouter = require('./router/pages')
 app.use('/test', pagesRouter) // will add any rout after '/test'
 

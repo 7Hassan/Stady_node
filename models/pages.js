@@ -2,16 +2,19 @@
 const mongoose = require('mongoose')
 
 // create Schema
-const schema = new mongoose.Schema({
-  name: { type: String, require: true, validate: { validator: (name) => name.length > 3 } }, // for validation
-  names: { type: Array, require: true },
-  exist: { type: Boolean, require: true },
+const nameSchema = new mongoose.Schema({
+  name: { type: String, require: false, validate: { validator: (name) => name.length > 3 } }, // for validation
+  names: { type: [String], require: [true, "names must have a name"] }, //! error message will display
   number: { type: Number, require: true },
   date: { type: Date, default: Date.now },
 })
-const schemaModel = mongoose.model('test', schema) //create model
+/*
+TODO: Create a model
+! Names => collection in data base
+*/
+const namesModel = mongoose.model('names', nameSchema)
 
-module.exports = schemaModel // export sechema
+module.exports = namesModel // export schema
 
 
 
