@@ -1,35 +1,41 @@
 
 const joi = require('joi') // package for validation for app not for database
+const { modelName } = require('../models/pages')
+const { catchError } = require('../errors/catchErrors')
 const namesModel = require('../models/pages') // get schema model
 
+exports.getHome = async (req, res) => {
+  //! Query
+  //? when get url => localhost:3000/home?name=hassan&age[lt]=20
+  let obj = { ...req.query } //! obj => {name : 'hassan' , age : { lt: '20'}}
+  obj = JSON.stringify(obj)
 
-exports.getHome = (req, res) => res.send("Home")
+  //! advanced filtering in Data
+  obj = obj.replace(/\b(gt|gte|lt|lte)\b/g, match => `$${match}`) //? match => (gt|gte|lt|lte)
+  let data = await namesModel.find(JSON.parse(obj))
+  res.send(data)
 
-exports.getAbout = (req, res) => res.send("about")
+  //! field
+  const ff = await namesModel.countDocuments()
+  console.log("🚀 ~ file: funs.js:22 ~ exports.getHome= ~ ff:", ff)
 
-exports.getProduct = (req, res) => res.send(req.params.id)
+}
 
-exports.postProduct = (req, res) => {
+exports.getAbout = catchError(async (req, res) => res.send(req.query.sort))
+
+exports.getProduct = catchError(async (req, res) => res.send("product"))
+
+exports.postProduct = catchError(async (req, res) => {
   const { error } = validation(req.body) //! get error 
   //? Handling error 
   if (error) res.status(404).send(error.details[0].message)
   else {
-    //createData()
-    // getData()
-    // updateData()
-    // deleteData()
     res.status(200).send('post done')
   }
-}
+})
 
-exports.getProductParameter = (req, res) => {
-  //req.params => id
-  res.send("g")
-  // if (req.params.id == "hassan")
-  //   return res.send(req.params.id)
-  // if (req.params.id != "hassan")
-  //   return res.status(400).send("none")
-}
+exports.getProductParameter = catchError(async (req, res) => res.send("g"))
+
 
 //TODO: Validation
 function validation(data) {
@@ -63,8 +69,23 @@ async function createData() {
 //TODO: Get DATA
 async function getData() {
   try {
+
+    const data = {
+      "name": 'hassan',
+      "age": {
+        "$lt": 20 //? less than 20
+      }
+    }
+    //! get names query and get objects inserted in it without __v and password fields
+    const result = await namesModel.find(data).populate({ path: 'users', select: '-__v -password' }) 
+    console.log("🚀 ~ file: funs.js:65 ~ getData ~ result:", result)
+  } catch (err) {
+    console.log("🚀 ~ file: funs.js:67 ~ getData ~ err:", err)
+  }
+  //! another way..
+  try {
     // to find the object from database and select one element from it
-    const result = await namesModel.find()
+    const result = await namesModel.find().where('name').equals('Hassan').where('rating').lt(5) //? lt => less than
     console.log("🚀 ~ file: funs.js:65 ~ getData ~ result:", result)
   } catch (err) {
     console.log("🚀 ~ file: funs.js:67 ~ getData ~ err:", err)
@@ -88,5 +109,35 @@ async function deleteData() {
     await namesModel.findOneAndDelete({ name: 'Hassan' })
   } catch (err) {
     console.log("🚀 ~ file: funs.js:76 ~ updateData ~ err:", err)
+  }
+}
+
+
+
+// aggregate method will return a query
+exports.getTourStats = async (reg, res) => {
+  try {
+    const stats = await modelName.aggregate([
+      {
+        $match: { ratingsAverage: { $gte: 4.5 } }
+      },
+      {
+        $group: {
+          _id: 'difficulty' || null,
+          numTours: { $sum: 1 },
+          numRatings: { $sum: '$ratingsQuantity' },
+          avgRating: {
+            $avg: '$ratingsAverage',
+            avgPrice: {
+              $avg: '$price',
+              minPrice: { $min: '$price' },
+              maxPrice: { $max: '$price' }
+            }
+          }
+        }
+      }
+    ])
+  } catch (err) {
+    console.log('🚀 ~ file: funs.js:142 ~ exports.getTourStats= ~ err:', err)
   }
 }
