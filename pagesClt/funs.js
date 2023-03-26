@@ -3,7 +3,8 @@ const joi = require('joi') // package for validation for app not for database
 const { modelName } = require('../models/pages')
 const { catchError } = require('../errors/catchErrors')
 const namesModel = require('../models/pages') // get schema model
-
+const multer = require('multer')
+const sharp = require('sharp')
 exports.getHome = async (req, res) => {
   //! Query
   //? when get url => localhost:3000/home?name=hassan&age[lt]=20
@@ -77,7 +78,7 @@ async function getData() {
       }
     }
     //! get names query and get objects inserted in it without __v and password fields
-    const result = await namesModel.find(data).populate({ path: 'users', select: '-__v -password' }) 
+    const result = await namesModel.find(data).populate({ path: 'users', select: '-__v -password' })
     console.log("🚀 ~ file: funs.js:65 ~ getData ~ result:", result)
   } catch (err) {
     console.log("🚀 ~ file: funs.js:67 ~ getData ~ err:", err)
@@ -141,3 +142,42 @@ exports.getTourStats = async (reg, res) => {
     console.log('🚀 ~ file: funs.js:142 ~ exports.getTourStats= ~ err:', err)
   }
 }
+
+//? upload many imgs
+
+const multerStorage = multer.memoryStorage()
+const multerFilter = (reg, file, cb) => {
+  if (file - mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppError('Not an image! Please upload only images,', 400), false)
+  }
+}
+const upload = multer({ storage: multerStorage, multerFilter: multerFilter })
+
+// exports.upload.single("single") for single
+// exports.upload.array ('images',5) for many
+
+// to customize many imgs
+exports.upload = upload.fields([
+  { name: 'mainImg', maxCount: 1 }, //for first img
+  { name: 'otherImg', maxCount: 3 } // other imgs 
+])
+
+exports.resizeImgs = async (reg, res, next) => {
+  if (!req.file) return next();
+  await Promise.all(
+    req.files.images.map(async (file, i) => {
+      const filename = `tour-${req.params.id}-${Date.now()}-${i + 1}.jpeg`
+    }),
+  await sharp(file.buffer)
+    .resize(2000, 1333).toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/tours/${filename}`),
+
+  req.body.images.push(filename)
+  )
+  next()
+
+}
+
